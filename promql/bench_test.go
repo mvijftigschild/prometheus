@@ -43,7 +43,8 @@ func BenchmarkRangeQuery(b *testing.B) {
 		metrics = append(metrics, labels.FromStrings("__name__", "b_hundred", "l", strconv.Itoa(i)))
 	}
 
-	for s := 0; s < 10000; s += 1 {
+	// A day of data plus 10k steps.
+	for s := 0; s < 8640+10000; s += 1 {
 		a, err := storage.Appender()
 		if err != nil {
 			b.Fatal(err)
@@ -69,6 +70,10 @@ func BenchmarkRangeQuery(b *testing.B) {
 		// Simple rate.
 		{
 			expr: "rate(a_X[1m])",
+		},
+		{
+			expr:  "rate(a_X[1m])",
+			steps: 10000,
 		},
 		// Holt-Winters and long ranges.
 		{
@@ -120,6 +125,7 @@ func BenchmarkRangeQuery(b *testing.B) {
 			tmp = append(tmp, benchCase{expr: c.expr, interval: c.interval, steps: 1})
 			tmp = append(tmp, benchCase{expr: c.expr, interval: c.interval, steps: 10})
 			tmp = append(tmp, benchCase{expr: c.expr, interval: c.interval, steps: 100})
+			tmp = append(tmp, benchCase{expr: c.expr, interval: c.interval, steps: 1000})
 		}
 	}
 	cases = tmp
